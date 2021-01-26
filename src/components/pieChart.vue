@@ -95,7 +95,8 @@ export default {
             data: [0.12],
             label: {
               formatter: function(param) {
-                return param.value * 100 + '人'
+                // return param.value * 100 + '人'
+                return  '--人'
               },
               fontSize: '14',
               textStyle: {
@@ -124,7 +125,8 @@ export default {
             radius: '20%',
             label: {
               formatter: function(param) {
-                return param.value * 100 + '人'
+                // return param.value * 100 + '人'
+                return  '--人'
               },
               fontSize: '14',
               textStyle: {
@@ -153,7 +155,8 @@ export default {
             radius: '20%',
             label: {
               formatter: function(param) {
-                return param.value * 100 + '人'
+                // return param.value * 100 + '人'
+                return  '--人'
               },
               fontSize: '14',
               textStyle: {
@@ -182,7 +185,8 @@ export default {
             radius: '20%',
             label: {
               formatter: function(param) {
-                return param.value * 100 + '人'
+                // return param.value * 100 + '人'
+                return  '--人'
               },
               fontSize: '14',
               textStyle: {

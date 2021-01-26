@@ -17,3 +17,12 @@ export const queryMapData = (params) => {
     data: params
   })
 }
+
+// 获取地图数据
+export const queryMap = (params) => {
+  return axios({
+    url: '/data/getData',
+    method: 'post',
+    data: params
+  })
+}
