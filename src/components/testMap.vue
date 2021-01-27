@@ -13,6 +13,7 @@
 <script>
 import echarts from 'echarts'
 import resize from './mixins/resize'
+import { queryMap, queryMapData } from '@/api/http'
 
 export default {
   name: 'TestMap',
@@ -27,7 +28,7 @@ export default {
         cityName: '全国',
         code: 100000
       }],
-      timeTitle: ['2020']
+      timeTitle: ['2020-08-10']
     }
   },
   mounted() {
@@ -37,10 +38,12 @@ export default {
     getGeoJson(adcode) {
       const that = this
       if (adcode.toString().substring(4, 6) !== '00') {
-        this.geoJson.features = this.geoJson.features.filter(
-          item => item.properties.adcode === adcode
-        )
-        this.getMapData()
+        // let arr
+        // this.geoJson.features = this.geoJson.features.filter(
+        //     item => item.properties.adcode === adcode
+        // );
+        //
+        // this.getMapData();
         return
       }
       const url = '/static/' + adcode + '.geoJson'
@@ -74,30 +77,43 @@ export default {
         mapData[item] = []
         pointData[item] = []
         sum[item] = 0
-        // console.log(this.geoJson.features)
-        this.geoJson.features.forEach(j => {
-          const value = Math.random() * 3000
-          mapData[item].push({
-            name: j.properties.name,
-            value: value,
-            cityCode: j.properties.adcode
-          })
-          // console.log(mapData[item])
-          pointData[item].push({
-            name: j.properties.name,
-            value: [j.properties.center[0], j.properties.center[1], value],
-            cityCode: j.properties.adcode
-          })
-          console.log(pointData[item])
-          sum[item] += value
-          // console.log(sum[item])
+        const adcodeList = []
+        this.geoJson.features.forEach(i => {
+          adcodeList.push(i.properties.adcode)
         })
-        mapData[item] = mapData[item].sort(function(a, b) {
-          return b.value - a.value
+        const params = {
+          adcode: adcodeList,
+          startDate: '2020-08-10',
+          endDate: '2020-08-11'
+        }
+        queryMapData(params).then((res) => {
+          let result = res.data
+          this.geoJson.features.forEach(j => {
+            let value = 0
+            result.forEach(i => {
+              if (i.code === j.properties.adcode) {
+                value = i.count
+              }
+            })
+            mapData[item].push({
+              name: j.properties.name,
+              value: value,
+              cityCode: j.properties.adcode
+            })
+            pointData[item].push({
+              name: j.properties.name,
+              value: [j.properties.center[0], j.properties.center[1], value],
+              cityCode: j.properties.adcode
+            })
+            sum[item] += value
+            mapData[item] = mapData[item].sort(function(a, b) {
+              return b.value - a.value
+            })
+          })
+          this.initEcharts(mapData, pointData, sum)
         })
+
       })
-      console.log(mapData)
-      this.initEcharts(mapData, pointData, sum)
     },
     initEcharts(mapData, pointData, sum) {
       this.myChart = echarts.init(this.$refs.allMap)
@@ -228,8 +244,7 @@ export default {
                   val = 0
                 }
                 const txtCon =
-                                        "<div style='text-align:left'>" + p.name + ':<br />销售额：' + val.toFixed(
-                                          2) + '万</div>'
+                  "<div style='text-align:left'>" + p.name + ':<br />就诊人数：' + val + '人</div>'
                 return txtCon
               }
             },
@@ -309,8 +324,8 @@ export default {
           title: [{
             left: 'center',
             top: 10,
-            text: item + '年' + this.parentInfo[this.parentInfo.length - 1].cityName +
-                                '患者来院就诊共' + sum[item].toFixed(2) + '万',
+            text: item + ' ' + this.parentInfo[this.parentInfo.length - 1].cityName +
+              '患者来院就诊共' + sum[item] + '人',
             textStyle: {
               color: 'rgb(179, 239, 255)',
               fontSize: 16
@@ -379,7 +394,7 @@ export default {
           },
           series: [
             {
-              name: item + '销售额度',
+              name: item + '人',
               type: 'map',
               geoIndex: 0,
               map: this.parentInfo.length === 1 ? 'china' : 'map',
@@ -394,8 +409,8 @@ export default {
                     val = 0
                   }
                   const txtCon =
-                                            "<div style='text-align:left'>" + p.name +
-                                            ':<br />销售额：' + val.toFixed(2) + '万</div>'
+                    "<div style='text-align:left'>" + p.name +
+                    ':<br />人数：' + val + '人</div>'
                   return txtCon
                 }
               },
@@ -463,16 +478,23 @@ export default {
       this.myChart.setOption(option, true)
       this.myChart.off('click')
       this.myChart.on('click', this.echartsMapClick)
+      this.myChart.getZr().on('click', (res) => { // 空白
+        // console.log(res)
+      })
     },
 
     // 点击下钻
     echartsMapClick(params) {
+      if (params.data.cityCode.toString().substring(4, 6) !== '00') return
+      if (params.data.cityCode === 110000) {
+        return
+      }
       if (!params.data) {
         return
       }
       if (
         this.parentInfo[this.parentInfo.length - 1].code ===
-                    params.data.cityCode
+        params.data.cityCode
       ) {
         return
       }
@@ -485,7 +507,6 @@ export default {
     },
     // 选择切换市县
     chooseArea(val, index) {
-      console.log(val)
       if (this.parentInfo.length === index + 1) {
         return
       }

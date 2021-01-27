@@ -15,13 +15,15 @@
 <script>
 import PieChart from '../components/pieChart'
 import allMap from '@/components/allMap'
+import testMap from '@/components/testMap'
 import DistrictCountChart from '../components/districtCountChart'
 export default {
   name: 'Home',
   components: {
     DistrictCountChart,
     allMap,
-    PieChart
+    PieChart,
+    testMap
   },
   data() {
     return {
@@ -31,6 +33,11 @@ export default {
           type: 'allMap',
           name: '综合地图',
           index: 4
+        },
+        {
+          type: 'testMap',
+          name: '综合地图',
+          index: 3
         }
       ]
     }
