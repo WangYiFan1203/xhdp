@@ -13,7 +13,7 @@
 <script>
   import echarts from 'echarts'
   import resize from './mixins/resize'
-  import { queryMapData } from '@/api/http'
+  import { getProvince,getCityOrCounty } from '@/api/http'
 
   export default {
     name: 'AllMap',
@@ -31,7 +31,9 @@
         timeTitle: ['2020-08-10'],
         dataTimer:null,
         otherData:[],
-        clickBJFlag:false
+        clickBJFlag:false,
+        clickCityOrCountyFlag: '',
+        cityOrCountyCode:''
       }
     },
     mounted() {
@@ -86,61 +88,109 @@
           mapData[item] = []
           pointData[item] = []
           sum[item] = 0
-          let adcodeList = []
-          this.geoJson.features.forEach(i => {
-            adcodeList.push(i.properties.adcode)
-          })
-          let params = {
-            dateTime: this.getNowFormatDate(),
-            adcode: adcodeList,
-            startDate: '2020-08-10',
-            endDate: '2020-08-11'
-          }
-          queryMapData(params).then((res) => {
-            let result = res.data
-            this.otherData = []
-            result.forEach(item=>{
-              if (item.code.toString()==='1100001'||item.code.toString()==='999999'){
-                this.otherData.push(item)
-              }
-            })
-            this.geoJson.features.forEach(j => {
-              let value = 0
-              let type = "0"
-              result.forEach(i => {
-                if (i.code === j.properties.adcode) {
-                  value = i.count
-                  type = i.type
+          let params
+          if (this.parentInfo.length === 1){
+            params = {
+              startDate: '2020-08-10',
+              endDate: '2020-08-11'
+            }
+            getProvince(params).then((res) => {
+              let result = res.data.codeResult
+              this.otherData = []
+              result.forEach(item=>{
+                if (item.code.toString()==='999999'){
+                  this.otherData.push(item)
                 }
               })
-              let label = j.properties.name
-              mapData[item].push({
-                name: label,
-                value: value,
-                cityCode: j.properties.adcode,
-                type: type
+              this.geoJson.features.forEach(j => {
+                let value = 0
+                let type = 0
+                result.forEach(i => {
+                  if (i.code === j.properties.adcode) {
+                    value = i.count
+                    type = i.type
+                  }
+                })
+                let label = j.properties.name
+                mapData[item].push({
+                  name: label,
+                  value: value,
+                  cityCode: j.properties.adcode,
+                  type: type
+                })
+                pointData[item].push({
+                  name: label,
+                  value: [j.properties.center[0], j.properties.center[1], value, type],
+                  cityCode: j.properties.adcode,
+                  type: type
+                })
+                // sum[item] += value
+                mapData[item] = mapData[item].sort(function(a, b) {
+                  return b.value - a.value
+                })
               })
-              pointData[item].push({
-                name: label,
-                value: [j.properties.center[0], j.properties.center[1], value, type],
-                cityCode: j.properties.adcode,
-                type: type
-              })
-              sum[item] += value
-              mapData[item] = mapData[item].sort(function(a, b) {
-                return b.value - a.value
-              })
+              sum[item] = res.data.total
+              this.initEcharts(mapData, pointData, sum)
             })
-            // console.log(mapData)
-            // console.log(pointData)
-            this.initEcharts(mapData, pointData, sum)
-          })
+          }else {
+            if (this.clickBJFlag){
+              params = {
+                startDate: '2020-08-10',
+                endDate: '2020-08-11',
+                adcode:"11",
+                flag:"city"
+              }
+            }else {
+              params = {
+                startDate: '2020-08-10',
+                endDate: '2020-08-11',
+                adcode: this.cityOrCountyCode,
+                flag:this.clickCityOrCountyFlag
+              }
+            }
+            getCityOrCounty(params).then((res) => {
+              let result = res.data.codeResult
+              this.otherData = []
+              result.forEach(item=>{
+                if (item.code.toString().length===7){
+                  this.otherData.push(item)
+                }
+              })
+              this.geoJson.features.forEach(j => {
+                let value = 0
+                let type = 0
+                result.forEach(i => {
+                  if (i.code === j.properties.adcode) {
+                    value = i.count
+                    type = i.type
+                  }
+                })
+                let label = j.properties.name
+                mapData[item].push({
+                  name: label,
+                  value: value,
+                  cityCode: j.properties.adcode,
+                  type: type
+                })
+                pointData[item].push({
+                  name: label,
+                  value: [j.properties.center[0], j.properties.center[1], value, type],
+                  cityCode: j.properties.adcode,
+                  type: type
+                })
+                // sum[item] += value
+                mapData[item] = mapData[item].sort(function(a, b) {
+                  return b.value - a.value
+                })
+              })
+              sum[item] = res.data.total
+              this.initEcharts(mapData, pointData, sum)
+            })
+          }
         })
       },
       initEcharts(mapData, pointData, sum) {
         this.myChart = echarts.init(this.$refs.allMap)
-        // this.myChart.clear()
-        // console.log(this.parentInfo)
         if (this.parentInfo.length === 1) {
           echarts.registerMap('china', this.geoJson) // 注册
         } else {
@@ -359,16 +409,8 @@
               }
             })
           }else{
-            this.parentInfo.forEach(i=>{
-              if (i.cityName==='北京市'){
-                this.otherData.forEach(item=>{
-                  if (item.code.toString() === '1100001'){
-                    xData.unshift("北京其他")
-                    yData.unshift(item.count)
-                  }
-                })
-              }
-            })
+            xData.unshift(this.parentInfo[this.parentInfo.length-1].cityName.substring(0,2)+'其他')
+            yData.unshift(this.otherData[0].count)
           }
           mapData[item].forEach(c => {
             xData.unshift(c.name)
@@ -560,6 +602,15 @@
       echartsMapClick(params) {
         if (params.name === '北京市'){
           this.clickBJFlag = true
+        }else {
+          this.clickBJFlag = false
+          if (params.data.cityCode.toString().substring(2,6) === '0000'){
+            this.clickCityOrCountyFlag = 'city'
+            this.cityOrCountyCode = params.data.cityCode.toString().substring(0,2)
+          }else {
+            this.clickCityOrCountyFlag = 'county'
+            this.cityOrCountyCode = params.data.cityCode.toString().substring(0,4)
+          }
         }
         if (params.data.cityCode.toString().substring(4, 6) !== '00') return
         if (!params.data) {

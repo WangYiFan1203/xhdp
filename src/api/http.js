@@ -9,19 +9,19 @@ export const queryBarData = (params) => {
   })
 }
 
-// 获取地图数据
-export const queryMapData = (params) => {
+// 获取地图省份数据
+export const getProvince = (params) => {
   return axios({
-    url: '/data/mapData',
+    url: '/mapData/getProvince',
     method: 'post',
     data: params
   })
 }
 
-// 获取地图数据
-export const queryMap = (params) => {
+// 获取地图市区数据
+export const getCityOrCounty = (params) => {
   return axios({
-    url: '/data/mapData',
+    url: '/mapData/getCityOrCounty',
     method: 'post',
     data: params
   })
