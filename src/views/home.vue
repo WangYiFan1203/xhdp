@@ -1,9 +1,10 @@
 <template>
   <div id="Home">
+    <div class="title">北京协和医院门诊就诊分布大屏</div>
     <el-row style="position: absolute;height: 100%;width: 100%">
       <el-col :span="8" style="display: flex;flex-direction: column;height: 100%">
-        <district-count-chart />
-        <pie-chart />
+        <district-count-chart style="height: 55%"/>
+        <pie-chart style="height: 45%" />
       </el-col>
       <el-col :span="16" style="height: 100%;">
         <component :is="currenIndex" v-cloak style="width:100%;height: 100%;z-index: 0" />
@@ -13,6 +14,7 @@
 </template>
 
 <script>
+
 import PieChart from '../components/pieChart'
 import allMap from '@/components/allMap'
 import testMap from '@/components/testMap'
@@ -55,6 +57,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+  @font-face {
+    font-family: 'aliHeiTi';
+    src: url("./../views/font/aliHeiTi.ttf");
+  }
   #Home {
     width: 100%;
     height: 100%;
@@ -63,6 +69,17 @@ export default {
     background-size: 100% 100%;
     color: #ffffff;
     overflow: hidden;
+
+    .title{
+      position: absolute;
+      text-align: center;
+      margin: 15px auto;
+      left: 0;
+      right: 0;
+      color: #ecf5ff;
+      font-size: 20px;
+      font-family: 'aliHeiTi'
+    }
 
     .select {
       position: absolute;

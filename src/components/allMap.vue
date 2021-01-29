@@ -1,12 +1,12 @@
 <template>
-  <div style="width:100%;height:100%;display: flex;flex-direction: column">
+  <div style="width:100%;height:100%;display: flex;flex-direction: column;position: relative">
     <div class="mapChoose">
       <span v-for="(item,index) in parentInfo" :key="item.code" style="height: 28px">
         <span class="title" @click="chooseArea(item,index)" style="height: 28px">{{ item.cityName==='全国'?'中国':item.cityName }}</span>
         <span v-show="index+1!==parentInfo.length" class="icon"></span>
       </span>
     </div>
-    <div ref="allMap" style="width:100%;height:95%;z-index: 0;margin-top: 5%"/>
+    <div ref="allMap" style="width:100%;height:100%;z-index: 0;position: relative"/>
   </div>
 </template>
 
@@ -190,6 +190,7 @@
         })
       },
       initEcharts(mapData, pointData, sum) {
+        console.log(mapData)
         this.myChart = echarts.init(this.$refs.allMap)
         if (this.parentInfo.length === 1) {
           echarts.registerMap('china', this.geoJson) // 注册
@@ -307,7 +308,7 @@
               roam: true,
               left: '15%',
               right: '25%',
-              top: '7%',
+              top: '12%',
               // center: this.parentInfo.length === 1 ? ['118.83531246', '32.0267395887'] : false,
               tooltip: {
                 trigger: 'item',
@@ -401,6 +402,11 @@
           if (mapData[item].length === 1) {
             min = 0
           }
+
+          mapData[item].forEach(c => {
+            xData.unshift(c.name)
+            yData.unshift(c.value)
+          })
           if (this.parentInfo.length===1){
             this.otherData.forEach(item=>{
               if (item.code.toString() === '999999'){
@@ -412,19 +418,16 @@
             xData.unshift(this.parentInfo[this.parentInfo.length-1].cityName.substring(0,2)+'其他')
             yData.unshift(this.otherData[0].count)
           }
-          mapData[item].forEach(c => {
-            xData.unshift(c.name)
-            yData.unshift(c.value)
-          })
+
           option.options.push({
             title: [{
               left: 'center',
-              top: 10,
+              top: '7%',
               text: item + ' ' + this.parentInfo[this.parentInfo.length - 1].cityName +
                 '患者来院就诊共' + sum[item] + '人',
               textStyle: {
                 color: 'rgb(179, 239, 255)',
-                fontSize: 16
+                fontSize: 14
               }
             }
             ],
@@ -649,7 +652,7 @@
         if (strDate >= 0 && strDate <= 9) {
           strDate = '0' + strDate
         }
-        var currentdate = date.getFullYear() + seperator1 + month + seperator1 + strDate
+        let currentdate = date.getFullYear() + seperator1 + month + seperator1 + strDate
           + ' ' + date.getHours() + seperator2 + date.getMinutes()
           + seperator2 + date.getSeconds()
         return currentdate
@@ -670,9 +673,10 @@
     float: left;
     padding: 5px;
     margin-left: 6%;
-    margin-top: 20px;
+    margin-top: 6%;
     margin-bottom: 5px;
     position: absolute;
+    z-index: 9999;
 
     .title {
       padding: 5px;

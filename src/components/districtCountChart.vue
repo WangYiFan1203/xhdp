@@ -52,10 +52,11 @@ export default {
         'title': {
           'text': '各院区就诊人数',
           x: 'center',
-          y: '4%',
+          y: '12%',
           textStyle: {
-            color: '#fff',
-            fontSize: '16'
+            color: 'rgb(179, 239, 255)',
+            fontSize: '14',
+            fontWeight:'bolder',
           },
           subtextStyle: {
             color: '#90979c',
@@ -70,7 +71,7 @@ export default {
           }
         },
         grid: {
-          top: '20%',
+          top: '25%',
           right: '8%',
           left: '10%',
           bottom: '12%'

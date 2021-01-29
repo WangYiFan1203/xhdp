@@ -27,11 +27,11 @@ export default {
             text: '患者及员工发热腹泻情况',
             textAlign: 'center',
             left: '50%',
-            top: '10%',
+            top: '12%',
             textStyle: {
-              fontSize: '16',
+              fontSize: '14',
               fontWeight: 'bolder',
-              color: '#ffffff',
+              color: 'rgb(179, 239, 255)',
               textAlign: 'center'
             }
           },
