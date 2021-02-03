@@ -13,7 +13,11 @@
 <script>
   import echarts from 'echarts'
   import resize from './mixins/resize'
-  import { getProvince,getCityOrCounty } from '@/api/http'
+  import { getProvince, getCityOrCounty } from '@/api/http'
+  import { getNowDate, getTomorrowDate } from '@/utils/date'
+
+  const startDate = getNowDate()
+  const endDate = getTomorrowDate()
 
   export default {
     name: 'AllMap',
@@ -28,19 +32,19 @@
           cityName: '全国',
           code: 100000
         }],
-        timeTitle: ['2020-08-10'],
-        dataTimer:null,
-        otherData:[],
-        clickBJFlag:false,
+        timeTitle: [startDate],
+        dataTimer: null,
+        otherData: [],
+        clickBJFlag: false,
         clickCityOrCountyFlag: '',
-        cityOrCountyCode:''
+        cityOrCountyCode: ''
       }
     },
     mounted() {
       this.getGeoJson(100000)
-      setTimeout(()=>{
-        this.dataTimer = setInterval(this.getMapData,300000)
-      },300000)
+      setTimeout(() => {
+        this.dataTimer = setInterval(this.getMapData, 300000)
+      }, 300000)
     },
     beforeDestroy() {
       clearInterval(this.dataTimer)
@@ -89,16 +93,16 @@
           pointData[item] = []
           sum[item] = 0
           let params
-          if (this.parentInfo.length === 1){
+          if (this.parentInfo.length === 1) {
             params = {
-              startDate: '2020-08-10',
-              endDate: '2020-08-11'
+              startDate: startDate,
+              endDate: endDate
             }
             getProvince(params).then((res) => {
               let result = res.data.codeResult
               this.otherData = []
-              result.forEach(item=>{
-                if (item.code.toString()==='999999'){
+              result.forEach(item => {
+                if (item.code.toString() === '999999') {
                   this.otherData.push(item)
                 }
               })
@@ -132,27 +136,27 @@
               sum[item] = res.data.total
               this.initEcharts(mapData, pointData, sum)
             })
-          }else {
-            if (this.clickBJFlag){
+          } else {
+            if (this.clickBJFlag) {
               params = {
-                startDate: '2020-08-10',
-                endDate: '2020-08-11',
-                adcode:"11",
-                flag:"city"
+                startDate: startDate,
+                endDate: endDate,
+                adcode: '11',
+                flag: 'city'
               }
-            }else {
+            } else {
               params = {
-                startDate: '2020-08-10',
-                endDate: '2020-08-11',
+                startDate: startDate,
+                endDate: endDate,
                 adcode: this.cityOrCountyCode,
-                flag:this.clickCityOrCountyFlag
+                flag: this.clickCityOrCountyFlag
               }
             }
             getCityOrCounty(params).then((res) => {
               let result = res.data.codeResult
               this.otherData = []
-              result.forEach(item=>{
-                if (item.code.toString().length===7){
+              result.forEach(item => {
+                if (item.code.toString().length === 7) {
                   this.otherData.push(item)
                 }
               })
@@ -190,7 +194,7 @@
         })
       },
       initEcharts(mapData, pointData, sum) {
-        console.log(mapData)
+        // console.log(mapData)
         this.myChart = echarts.init(this.$refs.allMap)
         if (this.parentInfo.length === 1) {
           echarts.registerMap('china', this.geoJson) // 注册
@@ -318,17 +322,17 @@
                     val = 0
                   }
                   let txtCon
-                  if (p.data.type === 0){
-                     txtCon =
+                  if (p.data.type === 0) {
+                    txtCon =
                       '<div style=\'text-align:left\'>' + p.name + ':<br />就诊人数：' + val + '人</div>'
-                  }else if (p.data.type === 1){
-                     txtCon =
+                  } else if (p.data.type === 1) {
+                    txtCon =
                       '<div style=\'text-align:left\'>' + p.name + ':<br />就诊人数：' + val + '人' +
                       '<br/>该地区为中风险地区</div>'
-                  }else if (p.data.type === 2){
-                     txtCon =
-                    '<div style=\'text-align:left\'>' + p.name + ':<br />就诊人数：' + val + '人' +
-                    '<br/>该地区为高风险地区</div>'
+                  } else if (p.data.type === 2) {
+                    txtCon =
+                      '<div style=\'text-align:left\'>' + p.name + ':<br />就诊人数：' + val + '人' +
+                      '<br/>该地区为高风险地区</div>'
                   }
 
                   return txtCon
@@ -407,15 +411,15 @@
             xData.unshift(c.name)
             yData.unshift(c.value)
           })
-          if (this.parentInfo.length===1){
-            this.otherData.forEach(item=>{
-              if (item.code.toString() === '999999'){
-                xData.unshift("其他")
+          if (this.parentInfo.length === 1) {
+            this.otherData.forEach(item => {
+              if (item.code.toString() === '999999') {
+                xData.unshift('其他')
                 yData.unshift(item.count)
               }
             })
-          }else{
-            xData.unshift(this.parentInfo[this.parentInfo.length-1].cityName.substring(0,2)+'其他')
+          } else {
+            xData.unshift(this.parentInfo[this.parentInfo.length - 1].cityName.substring(0, 2) + '其他')
             yData.unshift(this.otherData[0].count)
           }
 
@@ -533,35 +537,35 @@
                   brushType: 'fill'
                 },
                 itemStyle: {
-                  color:function(val){
-                    if (val.data.type === 0){
+                  color: function(val) {
+                    if (val.data.type === 0) {
                       return '#F4E925'
-                    }else if (val.data.type === 1){
+                    } else if (val.data.type === 1) {
                       return '#ffb434'
-                    }else if (val.data.type === 2){
+                    } else if (val.data.type === 2) {
                       return '#ff0000'
                     }
                   },
-                  shadowBlur:24,
-                  shadowColor:'#333'
+                  shadowBlur: 24,
+                  shadowColor: '#333'
                 },
                 data: pointData[item],
                 // symbolSize: 8,
                 symbolSize: function(val) {
                   let value = val[2]
                   let type = val[3]
-                  if (type === 0){
+                  if (type === 0) {
                     if (value === max) {
                       return 18
-                    }else if (value === 0){
+                    } else if (value === 0) {
                       return 0
-                    }else {
+                    } else {
                       return 12
                     }
-                  }else {
+                  } else {
                     if (value === max) {
                       return 18
-                    }else {
+                    } else {
                       return 12
                     }
                   }
@@ -603,16 +607,16 @@
 
       // 点击下钻
       echartsMapClick(params) {
-        if (params.name === '北京市'){
+        if (params.name === '北京市') {
           this.clickBJFlag = true
-        }else {
+        } else {
           this.clickBJFlag = false
-          if (params.data.cityCode.toString().substring(2,6) === '0000'){
+          if (params.data.cityCode.toString().substring(2, 6) === '0000') {
             this.clickCityOrCountyFlag = 'city'
-            this.cityOrCountyCode = params.data.cityCode.toString().substring(0,2)
-          }else {
+            this.cityOrCountyCode = params.data.cityCode.toString().substring(0, 2)
+          } else {
             this.clickCityOrCountyFlag = 'county'
-            this.cityOrCountyCode = params.data.cityCode.toString().substring(0,4)
+            this.cityOrCountyCode = params.data.cityCode.toString().substring(0, 4)
           }
         }
         if (params.data.cityCode.toString().substring(4, 6) !== '00') return
@@ -658,8 +662,8 @@
         return currentdate
       }
     },
-    watch:{
-      parentInfo(val){
+    watch: {
+      parentInfo(val) {
 
       }
     }

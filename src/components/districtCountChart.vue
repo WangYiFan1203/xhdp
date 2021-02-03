@@ -6,6 +6,10 @@
 import echarts from 'echarts'
 import resize from './mixins/resize'
 import { queryBarData } from '@/api/http'
+import { getNowDate, getTomorrowDate } from '@/utils/date'
+const startDate = getNowDate()
+const endDate = getTomorrowDate()
+
 export default {
   name: 'DistrictCountChart',
   mixins: [resize],
@@ -13,11 +17,18 @@ export default {
     return {
       chart: null,
       xData: [],
-      yData: []
+      yData: [],
+      dataTimer:null,
     }
+  },
+  beforeDestroy() {
+    clearInterval(this.dataTimer)
   },
   mounted() {
     this.getData()
+    setTimeout(() => {
+      this.dataTimer = setInterval(this.getData, 300000)
+    }, 300000)
   },
   methods: {
     strMapToObj(strMap) {
@@ -29,8 +40,8 @@ export default {
     },
     getData() {
       const mapObj = new Map()
-      mapObj.set('startDate', '2020-08-10')
-      mapObj.set('endDate', '2020-08-11')
+      mapObj.set('startDate', startDate)
+      mapObj.set('endDate', endDate)
       const obj = this.strMapToObj(mapObj)
       queryBarData(obj).then((res) => {
         const xArr = []

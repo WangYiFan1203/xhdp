@@ -13,7 +13,7 @@
 <script>
 import echarts from 'echarts'
 import resize from './mixins/resize'
-import { queryMap, queryMapData } from '@/api/http'
+import { queryMap } from '@/api/http'
 
 export default {
   name: 'TestMap',
@@ -86,32 +86,32 @@ export default {
           startDate: '2020-08-10',
           endDate: '2020-08-11'
         }
-        queryMapData(params).then((res) => {
-          let result = res.data
-          this.geoJson.features.forEach(j => {
-            let value = 0
-            result.forEach(i => {
-              if (i.code === j.properties.adcode) {
-                value = i.count
-              }
-            })
-            mapData[item].push({
-              name: j.properties.name,
-              value: value,
-              cityCode: j.properties.adcode
-            })
-            pointData[item].push({
-              name: j.properties.name,
-              value: [j.properties.center[0], j.properties.center[1], value],
-              cityCode: j.properties.adcode
-            })
-            sum[item] += value
-            mapData[item] = mapData[item].sort(function(a, b) {
-              return b.value - a.value
-            })
-          })
-          this.initEcharts(mapData, pointData, sum)
-        })
+        // queryMapData(params).then((res) => {
+        //   let result = res.data
+        //   this.geoJson.features.forEach(j => {
+        //     let value = 0
+        //     result.forEach(i => {
+        //       if (i.code === j.properties.adcode) {
+        //         value = i.count
+        //       }
+        //     })
+        //     mapData[item].push({
+        //       name: j.properties.name,
+        //       value: value,
+        //       cityCode: j.properties.adcode
+        //     })
+        //     pointData[item].push({
+        //       name: j.properties.name,
+        //       value: [j.properties.center[0], j.properties.center[1], value],
+        //       cityCode: j.properties.adcode
+        //     })
+        //     sum[item] += value
+        //     mapData[item] = mapData[item].sort(function(a, b) {
+        //       return b.value - a.value
+        //     })
+        //   })
+        //   this.initEcharts(mapData, pointData, sum)
+        // })
 
       })
     },
